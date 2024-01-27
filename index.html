@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<title>CSV Generator</title>
+		<style>
+			body {
+				font-family: 'Arial', sans-serif;
+				margin: 20px;
+				padding: 0;
+				background-color: #f7f7f7;
+				color: #333;
+			}
+
+			.container {
+				max-width: 600px;
+				margin: 0 auto;
+				background-color: #fff;
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			.header {
+				color: #007bff;
+				text-align: center;
+			}
+
+			.form-group {
+				margin-bottom: 20px;
+			}
+
+			.form-group label {
+				display: block;
+				margin-bottom: 8px;
+				font-weight: bold;
+				color: #555;
+			}
+
+			.form-group input {
+				width: 100%;
+				padding: 10px;
+				box-sizing: border-box;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+			}
+
+			.btn-primary {
+				background-color: #28a745;
+				color: white;
+				padding: 12px 20px;
+				border: none;
+				margin: 10px;
+				cursor: pointer;
+				border-radius: 5px;
+				display: inline-block;
+				font-size: 16px;
+				transition: background-color 0.3s ease;
+			}
+
+			.btn-primary:hover {
+				background-color: #218838;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1 class="header">CSV Generator</h1>
+
+			<div class="form-group">
+				<label for="date">Date:</label>
+				<input
+					type="date"
+					id="date"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="contact">Contact:</label>
+				<input
+					type="text"
+					id="contact"
+					placeholder="Enter contact information"
+				/>
+			</div>
+
+			<div class="form-group">
+				<label for="address">Address:</label>
+				<input
+					type="text"
+					id="address"
+					placeholder="Enter address"
+				/>
+			</div>
+
+			<input
+				type="hidden"
+				id="latitude"
+				placeholder="Latitude"
+				disabled
+			/>
+
+			<input
+				type="hidden"
+				id="longitude"
+				placeholder="Longitude"
+				disabled
+			/>
+			<div>
+				<button
+					class="btn-primary"
+					onclick="getLocation()"
+				>
+					Get Location
+				</button>
+
+				<button
+					class="btn-primary"
+					onclick="addData()"
+				>
+					Add Data
+				</button>
+				<button
+					class="btn-primary"
+					onclick="generateCSV()"
+				>
+					Generate CSV
+				</button>
+			</div>
+		</div>
+
+		<script>
+			var allData = [];
+
+			function getLocation() {
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(
+						(position) => {
+							const { latitude, longitude } = position.coords;
+							document.getElementById('latitude').value = latitude.toFixed(6);
+							document.getElementById('longitude').value = longitude.toFixed(6);
+						},
+						(error) => {
+							console.error('Error getting geolocation:', error);
+						}
+					);
+				} else {
+					console.error('Geolocation is not supported by this browser.');
+				}
+			}
+
+			function addData() {
+				var date = document.getElementById('date').value;
+				var contact = document.getElementById('contact').value;
+				var address = document.getElementById('address').value;
+				var latitude = document.getElementById('latitude').value;
+				var longitude = document.getElementById('longitude').value;
+
+				if (date && contact && address && latitude && longitude) {
+					allData.push([date, contact, address, latitude, longitude]);
+					// Clear input fields
+					document.getElementById('date').value = '';
+					document.getElementById('contact').value = '';
+					document.getElementById('address').value = '';
+				} else {
+					alert('Please fill in all fields.');
+				}
+			}
+
+			function generateCSV() {
+				if (allData.length === 0) {
+					alert('No data to generate CSV.');
+					return;
+				}
+
+				var csvContent = 'Date,Contact,Address,Latitude,Longitude\n';
+				allData.forEach(function (data) {
+					csvContent += data.join(',') + '\n';
+				});
+
+				var existingData = [];
+
+				// Check if a CSV file already exists
+				if (localStorage.getItem('user_data')) {
+					// If exists, load existing data
+					existingData = JSON.parse(localStorage.getItem('user_data'));
+				}
+
+				// Combine existing data and new data
+				var finalData = existingData.concat(allData);
+
+				// Save the combined data to localStorage
+				localStorage.setItem('user_data', JSON.stringify(finalData));
+
+				var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+				var link = document.createElement('a');
+				if (link.download !== undefined) {
+					var url = URL.createObjectURL(blob);
+					link.setAttribute('href', url);
+					link.setAttribute('download', 'user_data.csv');
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				}
+			}
+		</script>
+	</body>
+</html>
