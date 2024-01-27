@@ -25,9 +25,15 @@
 				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 			}
 
+			.logo-container {
+				display: flex;
+				gap: 20px;
+				align-items: center;
+				margin-bottom: 20px;
+			}
+
 			.header {
-				color: #007bff;
-				text-align: center;
+				color: red;
 			}
 
 			.form-group {
@@ -50,26 +56,43 @@
 			}
 
 			.btn-primary {
-				background-color: #28a745;
+				background-color: #2885a7;
 				color: white;
 				padding: 12px 20px;
 				border: none;
 				margin: 10px;
 				cursor: pointer;
 				border-radius: 5px;
-				display: inline-block;
 				font-size: 16px;
 				transition: background-color 0.3s ease;
+				display: block;
+				width: 100%;
 			}
 
 			.btn-primary:hover {
 				background-color: #218838;
 			}
+
+			.btn-primary.clicked {
+				background-color: #e44d26; /* Orange color when clicked */
+			}
+
+			img {
+				max-width: 58px;
+				height: auto;
+				margin-bottom: 8px;
+			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
-			<h1 class="header">CSV Generator</h1>
+			<div class="logo-container">
+				<img
+					src="/logo192.png"
+					alt="logo"
+				/>
+				<h1 class="header">Lead Form</h1>
+			</div>
 
 			<div class="form-group">
 				<label for="date">Date:</label>
@@ -110,27 +133,31 @@
 				placeholder="Longitude"
 				disabled
 			/>
-			<div>
-				<button
-					class="btn-primary"
-					onclick="getLocation()"
-				>
-					Get Location
-				</button>
 
-				<button
-					class="btn-primary"
-					onclick="addData()"
-				>
-					Add Data
-				</button>
-				<button
-					class="btn-primary"
-					onclick="generateCSV()"
-				>
-					Generate CSV
-				</button>
-			</div>
+			<button
+				class="btn-primary"
+				onclick="getLocation()"
+			>
+				Get Location
+			</button>
+			<button
+				class="btn-primary"
+				onclick="getDirections()"
+			>
+				Get Directions
+			</button>
+			<button
+				class="btn-primary"
+				onclick="addData()"
+			>
+				Add Data
+			</button>
+			<button
+				class="btn-primary"
+				onclick="generateCSV()"
+			>
+				Generate CSV
+			</button>
 		</div>
 
 		<script>
@@ -143,16 +170,31 @@
 							const { latitude, longitude } = position.coords;
 							document.getElementById('latitude').value = latitude.toFixed(6);
 							document.getElementById('longitude').value = longitude.toFixed(6);
+							alert('Location Retrieved');
 						},
 						(error) => {
 							console.error('Error getting geolocation:', error);
+							alert('Error getting location');
 						}
 					);
 				} else {
 					console.error('Geolocation is not supported by this browser.');
 				}
 			}
+			function getDirections() {
+				var latitude = document.getElementById('latitude').value;
+				var longitude = document.getElementById('longitude').value;
 
+				if (latitude && longitude) {
+					// Construct the Google Maps URL with the latitude and longitude
+					var mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+					// Open the URL in a new tab or window
+					window.open(mapsUrl, '_blank');
+				} else {
+					alert('Latitude and longitude are required to get directions.');
+				}
+			}
 			function addData() {
 				var date = document.getElementById('date').value;
 				var contact = document.getElementById('contact').value;
